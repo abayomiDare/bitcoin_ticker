@@ -1,3 +1,4 @@
+import 'package:bitcoin_ticker/exchange_rate.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'coin_data.dart';
@@ -10,6 +11,7 @@ class PriceScreen extends StatefulWidget {
 
 class _PriceScreenState extends State<PriceScreen> {
   late String selectedCurrency = 'USD';
+
   DropdownButton<String> androidDropDown() {
     List<DropdownMenuItem<String>> menuItem = [];
 
@@ -26,6 +28,7 @@ class _PriceScreenState extends State<PriceScreen> {
         items: menuItem,
         onChanged: (value) {
           setState(() {
+            getCoinRate('BTC', selectedCurrency);
             selectedCurrency = value!;
           });
         });
@@ -54,6 +57,24 @@ class _PriceScreenState extends State<PriceScreen> {
     }
   }
 
+  late String coinValue = '?';
+  void getCoinRate(String coin, String currency) async {
+    ExchangeRate coinRate = ExchangeRate(coin: coin, currency: currency);
+    var rate = await coinRate.getExchangeRate();
+    setState(() {
+      coinValue = rate['rate'].toStringAsFixed(0);
+    });
+
+    // print(coinValue);
+    // print('@initial stage');
+  }
+
+  @override
+  void initState() {
+    getCoinRate('BTC', selectedCurrency);
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -72,12 +93,13 @@ class _PriceScreenState extends State<PriceScreen> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10.0),
               ),
-              child: const Padding(
-                padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                    vertical: 15.0, horizontal: 28.0),
                 child: Text(
-                  '1 BTC = ? USD',
+                  '1 BTC = $coinValue $selectedCurrency',
                   textAlign: TextAlign.center,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 20.0,
                     color: Colors.white,
                   ),
